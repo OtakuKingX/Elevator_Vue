@@ -33,8 +33,13 @@
                 :class="p.direction === 1 ? 'up' : 'down'"
                 :title="`#${p.id}: ${p.fromFloor}F → ${p.toFloor}F`"
               >
-                <span class="arrow">{{ p.direction === 1 ? '▲' : '▼' }}</span>
-                <span class="target">{{ p.toFloor }}</span>
+                <div class="person-figure">
+                  <span class="arrow">{{ p.direction === 1 ? '▲' : '▼' }}</span>
+                  <div class="head"></div>
+                  <div class="body">
+                    <span class="target">{{ p.toFloor }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -306,33 +311,81 @@ const getElevatorTooltip = (e: ElevatorState) => {
 .passenger-icon {
   display: inline-flex;
   align-items: center;
-  padding: 2px 5px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: bold;
-  color: white;
+  justify-content: center;
+  padding: 3px 4px;
   animation: fadeIn 0.3s ease;
   cursor: default;
 }
 
-.passenger-icon.up {
-  background-color: #27ae60;
-  border-bottom: 2px solid #1e8449;
-}
-
-.passenger-icon.down {
-  background-color: #e74c3c;
-  border-bottom: 2px solid #c0392b;
+.person-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
 }
 
 .arrow {
-  margin-right: 2px;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  margin-bottom: 1px;
+}
+
+.passenger-icon.up .arrow {
+  color: #27ae60;
+}
+
+.passenger-icon.down .arrow {
+  color: #e74c3c;
+}
+
+.head {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-bottom: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.passenger-icon.up .head {
+  background-color: #27ae60;
+  border: 1.5px solid #1e8449;
+}
+
+.passenger-icon.down .head {
+  background-color: #e74c3c;
+  border: 1.5px solid #c0392b;
+}
+
+.body {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.passenger-icon.up .body {
+  background-color: #27ae60;
+  border: 1.5px solid #1e8449;
+}
+
+.passenger-icon.down .body {
+  background-color: #e74c3c;
+  border: 1.5px solid #c0392b;
 }
 
 .target {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 0 3px;
-  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1.2;
 }
 
 @keyframes fadeIn {
