@@ -1,23 +1,31 @@
 <template>
-  <div class="elevator-app">
-    <DashboardHeader
-      :speedLevel="speedLevel"
-      :speedLabels="speedLabels"
-      @changeSpeed="changeSpeed"
-      @start="handleStart"
-      @stop="handleStop"
-      @reset="handleReset"
-    />
+  <v-app>
+    <v-main>
+      <v-container fluid class="pa-4">
+        <DashboardHeader
+          :speedLevel="speedLevel"
+          :speedLabels="speedLabels"
+          @changeSpeed="changeSpeed"
+          @start="handleStart"
+          @stop="handleStop"
+          @reset="handleReset"
+        />
 
-    <ConfigPanel />
+        <ConfigPanel />
 
-    <main class="simulation-container">
-      <BuildingView />
-      <LogPanel />
-    </main>
+        <v-row class="simulation-container">
+          <v-col cols="12" lg="8">
+            <BuildingView />
+          </v-col>
+          <v-col cols="12" lg="4">
+            <LogPanel />
+          </v-col>
+        </v-row>
 
-    <StatsPanel v-if="showStats" @close="showStats = false" />
-  </div>
+        <StatsPanel v-if="showStats" @close="showStats = false" />
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script setup lang="ts">
@@ -81,18 +89,7 @@ onUnmounted(() => handleStop())
 </script>
 
 <style scoped>
-.elevator-app {
-  font-family: 'Inter', system-ui, sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
-  color: #2c3e50;
-  padding: 20px;
-}
-
 .simulation-container {
-  display: grid;
-  grid-template-columns: 1fr 350px;
-  gap: 20px;
-  height: 700px;
+  margin-top: 16px;
 }
 </style>

@@ -16,8 +16,10 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@mdi/font": "^7.4.47",
     "pinia": "^3.0.4",
-    "vue": "^3.5.27"
+    "vue": "^3.5.27",
+    "vuetify": "^3.12.1"
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.4",

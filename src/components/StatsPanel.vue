@@ -1,46 +1,89 @@
 <template>
-  <div v-if="store.stats && !store.isRunning" class="stats-overlay">
-    <div class="stats-card">
-      <h2>📊 模擬統計結果</h2>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <span class="stat-label">總耗時</span>
-          <span class="stat-value highlight">{{ store.stats.totalTime }}s</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">平均等待時間</span>
-          <span class="stat-value">{{ store.stats.avgWaitTime }}s</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">最長等待時間</span>
-          <span class="stat-value warn">{{ store.stats.maxWaitTime }}s</span>
-        </div>
-      </div>
+  <v-dialog :model-value="true" max-width="700" persistent>
+    <v-card v-if="store.stats && !store.isRunning">
+      <v-card-title class="d-flex align-center justify-center text-h5 pa-4">
+        <v-icon class="mr-2" size="32">mdi-chart-bar</v-icon>
+        模擬統計結果
+      </v-card-title>
 
-      <h3>各電梯效率</h3>
-      <div class="elevator-stats">
-        <div v-for="es in store.stats.perElevator" :key="es.id" class="elevator-stat-card">
-          <div class="es-header">E{{ es.id }}</div>
-          <div class="es-row">
-            <span>載客人次</span>
-            <strong>{{ es.tripCount }}</strong>
-          </div>
-          <div class="es-row">
-            <span>移動樓層數</span>
-            <strong>{{ es.totalFloorsMoved }}</strong>
-          </div>
-          <div class="es-row">
-            <span>效率 (人/層)</span>
-            <strong>{{
-              es.totalFloorsMoved > 0 ? (es.tripCount / es.totalFloorsMoved).toFixed(2) : '—'
-            }}</strong>
-          </div>
-        </div>
-      </div>
+      <v-card-text class="pa-4">
+        <v-row>
+          <v-col cols="12" sm="4">
+            <v-card variant="tonal" color="primary" class="text-center pa-4">
+              <div class="text-caption">總耗時</div>
+              <div class="text-h4 font-weight-bold">{{ store.stats.totalTime }}s</div>
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <v-card variant="tonal" class="text-center pa-4">
+              <div class="text-caption">平均等待時間</div>
+              <div class="text-h4 font-weight-bold">{{ store.stats.avgWaitTime }}s</div>
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <v-card variant="tonal" color="error" class="text-center pa-4">
+              <div class="text-caption">最長等待時間</div>
+              <div class="text-h4 font-weight-bold">{{ store.stats.maxWaitTime }}s</div>
+            </v-card>
+          </v-col>
+        </v-row>
 
-      <button class="close-btn" @click="$emit('close')">關閉</button>
-    </div>
-  </div>
+        <v-divider class="my-4"></v-divider>
+
+        <div class="text-h6 mb-3 text-primary">
+          <v-icon class="mr-1">mdi-elevator</v-icon>
+          各電梯效率
+        </div>
+
+        <v-row>
+          <v-col v-for="es in store.stats.perElevator" :key="es.id" cols="12" sm="6" md="4">
+            <v-card variant="outlined" class="pa-3">
+              <div class="text-h6 text-primary mb-2">E{{ es.id }}</div>
+              <v-list density="compact" class="pa-0 bg-transparent">
+                <v-list-item class="px-0">
+                  <template v-slot:prepend>
+                    <v-icon size="small">mdi-account-multiple</v-icon>
+                  </template>
+                  <v-list-item-title>載客人次</v-list-item-title>
+                  <template v-slot:append>
+                    <strong>{{ es.tripCount }}</strong>
+                  </template>
+                </v-list-item>
+                <v-list-item class="px-0">
+                  <template v-slot:prepend>
+                    <v-icon size="small">mdi-stairs</v-icon>
+                  </template>
+                  <v-list-item-title>移動樓層數</v-list-item-title>
+                  <template v-slot:append>
+                    <strong>{{ es.totalFloorsMoved }}</strong>
+                  </template>
+                </v-list-item>
+                <v-list-item class="px-0">
+                  <template v-slot:prepend>
+                    <v-icon size="small">mdi-speedometer</v-icon>
+                  </template>
+                  <v-list-item-title>效率 (人/層)</v-list-item-title>
+                  <template v-slot:append>
+                    <strong>{{
+                      es.totalFloorsMoved > 0
+                        ? (es.tripCount / es.totalFloorsMoved).toFixed(2)
+                        : '—'
+                    }}</strong>
+                  </template>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-card-text>
+
+      <v-card-actions class="justify-center pa-4">
+        <v-btn color="primary" size="large" @click="$emit('close')" prepend-icon="mdi-close">
+          關閉
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -54,134 +97,5 @@ defineEmits<{
 </script>
 
 <style scoped>
-.stats-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  backdrop-filter: blur(4px);
-}
-
-.stats-card {
-  background: #1a1a2e;
-  color: #ecf0f1;
-  border-radius: 16px;
-  padding: 32px 40px;
-  min-width: 420px;
-  max-width: 600px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.stats-card h2 {
-  margin: 0 0 20px;
-  text-align: center;
-}
-
-.stats-card h3 {
-  margin: 24px 0 12px;
-  color: #42b883;
-  font-size: 15px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.stat-item {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 14px;
-  text-align: center;
-}
-
-.stat-label {
-  display: block;
-  font-size: 12px;
-  color: #8e9eab;
-  margin-bottom: 6px;
-}
-
-.stat-value {
-  display: block;
-  font-size: 28px;
-  font-weight: bold;
-  color: #42b883;
-}
-
-.stat-value.highlight {
-  color: #3498db;
-}
-
-.stat-value.warn {
-  color: #e74c3c;
-}
-
-.elevator-stats {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.elevator-stat-card {
-  flex: 1;
-  min-width: 140px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 14px;
-  border-left: 3px solid #42b883;
-}
-
-.es-header {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  color: #3498db;
-}
-
-.es-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  margin-bottom: 4px;
-  color: #bdc3c7;
-}
-
-.es-row strong {
-  color: white;
-}
-
-.close-btn {
-  display: block;
-  margin: 24px auto 0;
-  padding: 10px 32px;
-  background: #42b883;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.close-btn:hover {
-  background: #36a276;
-}
+/* Vuetify 處理所有樣式 */
 </style>

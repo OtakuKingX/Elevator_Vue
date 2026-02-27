@@ -1,61 +1,69 @@
 <template>
-  <div class="building">
-    <!-- 電梯井標題列 -->
-    <div class="shaft-header">
-      <div class="floor-label-header"></div>
-      <div v-for="e in store.elevators" :key="'h' + e.id" class="shaft-label">E{{ e.id }}</div>
-      <div class="waiting-label">等候區</div>
-    </div>
-
-    <!-- 樓層容器 (相對定位，電梯在此內絕對定位) -->
-    <div class="floors-container" ref="floorsRef">
-      <!-- 樓層列 -->
-      <div v-for="floor in floors" :key="floor" class="floor-row">
-        <div class="floor-info">
-          <span class="floor-name">{{ floor }}F</span>
+  <v-card height="700">
+    <v-card-title class="d-flex align-center bg-secondary">
+      <v-icon class="mr-2">mdi-office-building-marker</v-icon>
+      電梯運行視圖
+    </v-card-title>
+    <v-card-text class="pa-0 d-flex flex-column" style="height: calc(100% - 64px)">
+      <div class="building">
+        <!-- 電梯井標題列 -->
+        <div class="shaft-header">
+          <div class="floor-label-header"></div>
+          <div v-for="e in store.elevators" :key="'h' + e.id" class="shaft-label">E{{ e.id }}</div>
+          <div class="waiting-label">等候區</div>
         </div>
 
-        <!-- 空的 shaft 佔位 (背景用) -->
-        <div v-for="e in store.elevators" :key="'s' + e.id" class="shaft"></div>
+        <!-- 樓層容器 (相對定位，電梯在此內絕對定位) -->
+        <div class="floors-container" ref="floorsRef">
+          <!-- 樓層列 -->
+          <div v-for="floor in floors" :key="floor" class="floor-row">
+            <div class="floor-info">
+              <span class="floor-name">{{ floor }}F</span>
+            </div>
 
-        <!-- 等候區 -->
-        <div class="waiting-area">
+            <!-- 空的 shaft 佔位 (背景用) -->
+            <div v-for="e in store.elevators" :key="'s' + e.id" class="shaft"></div>
+
+            <!-- 等候區 -->
+            <div class="waiting-area">
+              <div
+                v-for="p in getWaitingAt(floor)"
+                :key="p.id"
+                class="passenger-icon"
+                :class="p.direction === 1 ? 'up' : 'down'"
+                :title="`#${p.id}: ${p.fromFloor}F → ${p.toFloor}F`"
+              >
+                <span class="arrow">{{ p.direction === 1 ? '▲' : '▼' }}</span>
+                <span class="target">{{ p.toFloor }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 電梯本體 (絕對定位，用 translateY 平滑移動) -->
           <div
-            v-for="p in getWaitingAt(floor)"
-            :key="p.id"
-            class="passenger-icon"
-            :class="p.direction === 1 ? 'up' : 'down'"
-            :title="`#${p.id}: ${p.fromFloor}F → ${p.toFloor}F`"
+            v-for="(e, idx) in store.elevators"
+            :key="'car' + e.id"
+            class="elevator-car"
+            :class="[e.status, { 'door-open': e.status === 'PROCESSING' }]"
+            :style="getElevatorStyle(e, idx)"
+            :title="getElevatorTooltip(e)"
           >
-            <span class="arrow">{{ p.direction === 1 ? '▲' : '▼' }}</span>
-            <span class="target">{{ p.toFloor }}</span>
+            <div class="car-body">
+              <!-- 門 -->
+              <div class="door door-left" :class="{ open: e.status === 'PROCESSING' }"></div>
+              <div class="door door-right" :class="{ open: e.status === 'PROCESSING' }"></div>
+              <!-- 內容 -->
+              <div class="car-content">
+                <div class="car-id">E{{ e.id }}</div>
+                <div class="direction">{{ getDirSign(e.direction) }}</div>
+                <div class="load">{{ e.passengers.length }}/{{ store.config.maxCapacity }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- 電梯本體 (絕對定位，用 translateY 平滑移動) -->
-      <div
-        v-for="(e, idx) in store.elevators"
-        :key="'car' + e.id"
-        class="elevator-car"
-        :class="[e.status, { 'door-open': e.status === 'PROCESSING' }]"
-        :style="getElevatorStyle(e, idx)"
-        :title="getElevatorTooltip(e)"
-      >
-        <div class="car-body">
-          <!-- 門 -->
-          <div class="door door-left" :class="{ open: e.status === 'PROCESSING' }"></div>
-          <div class="door door-right" :class="{ open: e.status === 'PROCESSING' }"></div>
-          <!-- 內容 -->
-          <div class="car-content">
-            <div class="car-id">E{{ e.id }}</div>
-            <div class="direction">{{ getDirSign(e.direction) }}</div>
-            <div class="load">{{ e.passengers.length }}/{{ store.config.maxCapacity }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -106,11 +114,10 @@ const getElevatorTooltip = (e: ElevatorState) => {
 <style scoped>
 .building {
   background: #f8f9fa;
-  border: 4px solid #333;
-  border-radius: 8px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  height: 100%;
 }
 
 .shaft-header {

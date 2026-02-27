@@ -1,50 +1,91 @@
 <template>
-  <header class="dashboard">
-    <h1>🏢 電梯管理模擬系統</h1>
-    <div class="stats-panel">
-      <div class="stat-box">
-        <span class="label">模擬時間</span>
-        <span class="value">{{ store.time }}s</span>
+  <v-card class="mb-4">
+    <v-card-title class="d-flex align-center justify-space-between flex-wrap pa-4 bg-secondary">
+      <div class="d-flex align-center">
+        <v-icon size="32" class="mr-2">mdi-office-building</v-icon>
+        <span class="text-h5">電梯管理模擬系統</span>
       </div>
-      <div class="stat-box">
-        <span class="label">已送達</span>
-        <span class="value">{{ store.finishedPeopleCount }} / {{ store.config.targetPeople }}</span>
-      </div>
-      <div class="stat-box">
-        <span class="label">等待中</span>
-        <span class="value waiting">{{ store.waitingQueue.length }}</span>
-      </div>
-      <div class="stat-box speed-box">
-        <span class="label">速度</span>
-        <div class="speed-control">
-          <button class="speed-btn" @click="$emit('changeSpeed', -1)" :disabled="speedLevel <= 0">
-            −
-          </button>
-          <span class="value speed-value">{{ speedLabels[speedLevel] }}</span>
-          <button
-            class="speed-btn"
-            @click="$emit('changeSpeed', 1)"
-            :disabled="speedLevel >= speedLabels.length - 1"
-          >
-            +
-          </button>
-        </div>
-      </div>
-      <div class="actions">
-        <button @click="$emit('start')" :disabled="store.isRunning" class="btn start">
-          開始模擬
-        </button>
-        <button @click="$emit('stop')" :disabled="!store.isRunning" class="btn stop">暫停</button>
-        <button @click="$emit('reset')" class="btn reset">重置</button>
-      </div>
-    </div>
-  </header>
 
-  <!-- 進度條 -->
-  <div class="progress-bar-container">
-    <div class="progress-bar" :style="{ width: progressPercent + '%' }"></div>
-    <span class="progress-text">送達進度 {{ progressPercent }}%</span>
-  </div>
+      <div class="d-flex align-center gap-2 flex-wrap">
+        <v-btn
+          color="primary"
+          :disabled="store.isRunning"
+          @click="$emit('start')"
+          prepend-icon="mdi-play"
+        >
+          開始模擬
+        </v-btn>
+        <v-btn
+          color="error"
+          :disabled="!store.isRunning"
+          @click="$emit('stop')"
+          prepend-icon="mdi-pause"
+        >
+          暫停
+        </v-btn>
+        <v-btn color="grey" @click="$emit('reset')" prepend-icon="mdi-refresh"> 重置 </v-btn>
+      </div>
+    </v-card-title>
+
+    <v-card-text class="pa-4">
+      <v-row>
+        <v-col cols="12" sm="6" md="3">
+          <v-card variant="outlined" class="text-center pa-3">
+            <div class="text-caption text-medium-emphasis">模擬時間</div>
+            <div class="text-h5 text-primary font-weight-bold">{{ store.time }}s</div>
+          </v-card>
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+          <v-card variant="outlined" class="text-center pa-3">
+            <div class="text-caption text-medium-emphasis">已送達</div>
+            <div class="text-h5 text-primary font-weight-bold">
+              {{ store.finishedPeopleCount }} / {{ store.config.targetPeople }}
+            </div>
+          </v-card>
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+          <v-card variant="outlined" class="text-center pa-3">
+            <div class="text-caption text-medium-emphasis">等待中</div>
+            <div class="text-h5 text-accent font-weight-bold">{{ store.waitingQueue.length }}</div>
+          </v-card>
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+          <v-card variant="outlined" class="text-center pa-3">
+            <div class="text-caption text-medium-emphasis">速度</div>
+            <div class="d-flex align-center justify-center gap-2">
+              <v-btn
+                size="small"
+                icon="mdi-minus"
+                @click="$emit('changeSpeed', -1)"
+                :disabled="speedLevel <= 0"
+                variant="text"
+              ></v-btn>
+              <span class="text-h6 font-weight-bold">{{ speedLabels[speedLevel] }}</span>
+              <v-btn
+                size="small"
+                icon="mdi-plus"
+                @click="$emit('changeSpeed', 1)"
+                :disabled="speedLevel >= speedLabels.length - 1"
+                variant="text"
+              ></v-btn>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-card-text>
+
+    <!-- 進度條 -->
+    <v-progress-linear
+      :model-value="progressPercent"
+      color="primary"
+      height="25"
+      class="text-center"
+    >
+      <template v-slot:default="{ value }">
+        <strong class="text-white">送達進度 {{ Math.ceil(value) }}%</strong>
+      </template>
+    </v-progress-linear>
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -71,134 +112,7 @@ const progressPercent = computed(() =>
 </script>
 
 <style scoped>
-.dashboard {
-  background: #1a1a1a;
-  color: white;
-  padding: 20px;
-  border-radius: 12px 12px 0 0;
-  margin-bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.stats-panel {
-  display: flex;
-  gap: 24px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.stat-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.stat-box .label {
-  font-size: 12px;
-  color: #aaa;
-}
-.stat-box .value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #42b883;
-}
-.stat-box .value.waiting {
-  color: #f39c12;
-}
-
-.speed-box {
-  min-width: 100px;
-}
-.speed-control {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.speed-btn {
-  width: 28px;
-  height: 28px;
-  border: 1px solid #555;
-  border-radius: 4px;
-  background: #333;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-}
-.speed-btn:hover:not(:disabled) {
-  background: #42b883;
-}
-.speed-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-.speed-value {
-  font-size: 18px !important;
-  min-width: 30px;
-  text-align: center;
-}
-
-.progress-bar-container {
-  width: 100%;
-  height: 22px;
-  background: #1a1a1a;
-  border-radius: 0 0 12px 12px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  position: relative;
-}
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #42b883, #2ecc71);
-  transition: width 0.4s ease;
-  border-radius: 0 3px 3px 0;
-}
-.progress-text {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-left: 10px;
-  transition: opacity 0.2s;
-}
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.start {
-  background: #42b883;
-  color: white;
-}
-.stop {
-  background: #e74c3c;
-  color: white;
-}
-.reset {
-  background: #7f8c8d;
-  color: white;
+.gap-2 {
+  gap: 8px;
 }
 </style>

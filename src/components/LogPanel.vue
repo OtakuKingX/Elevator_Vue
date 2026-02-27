@@ -1,14 +1,20 @@
 <template>
-  <aside class="side-panel">
-    <h3>
-      運作日誌 <span class="log-count">({{ store.logs.length }})</span>
-    </h3>
-    <div class="log-viewer" ref="logContainer">
-      <div v-for="(log, idx) in store.logs" :key="idx" class="log-entry" :class="getLogClass(log)">
-        {{ log }}
-      </div>
-    </div>
-  </aside>
+  <v-card class="log-panel d-flex flex-column" height="700">
+    <v-card-title class="d-flex align-center bg-secondary flex-shrink-0">
+      <v-icon class="mr-2">mdi-text-box-outline</v-icon>
+      運作日誌
+      <v-chip size="small" class="ml-2">{{ store.logs.length }}</v-chip>
+    </v-card-title>
+    <v-card-text class="flex-grow-1 pa-0" style="height: calc(100% - 64px); overflow: hidden">
+      <v-virtual-scroll :items="store.logs" height="100%" item-height="30" ref="logContainer">
+        <template v-slot:default="{ item }">
+          <div class="log-entry pa-2" :class="getLogClass(item)">
+            {{ item }}
+          </div>
+        </template>
+      </v-virtual-scroll>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -39,54 +45,13 @@ const getLogClass = (log: string) => {
 </script>
 
 <style scoped>
-.side-panel {
-  background: #2c3e50;
-  color: #ecf0f1;
-  border-radius: 8px;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-height: 700px;
-  box-sizing: border-box;
-}
-
-.side-panel h3 {
-  margin-top: 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #444;
-}
-
-.log-count {
-  font-size: 13px;
-  color: #7f8c8d;
-  font-weight: normal;
-}
-
-.log-viewer {
-  flex-grow: 1;
-  overflow-y: auto;
+.log-panel {
   font-family: 'Courier New', Courier, monospace;
-  font-size: 13px;
-  background: #1a1a1a;
-  padding: 10px;
-  border-radius: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: #42b883 #1a1a1a;
-}
-
-.log-viewer::-webkit-scrollbar {
-  width: 6px;
-}
-.log-viewer::-webkit-scrollbar-thumb {
-  background-color: #42b883;
-  border-radius: 10px;
 }
 
 .log-entry {
-  margin-bottom: 5px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 2px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   color: #8e9eab;
 }
 
@@ -95,9 +60,11 @@ const getLogClass = (log: string) => {
 }
 .log-entry.log-pickup {
   color: #42b883;
+  font-weight: 500;
 }
 .log-entry.log-dropoff {
   color: #3498db;
+  font-weight: 500;
 }
 .log-entry.log-finish {
   color: #f1c40f;
