@@ -194,16 +194,23 @@ export const useElevatorStore = defineStore('elevator', () => {
     }
 
     const anyoneToDrop = e.passengers.some((p) => p.toFloor === e.currentFloor)
-    const isTargetedToPick = e.targetFloors.has(e.currentFloor)
 
-    const canPickUpOnTheWay = waitingQueue.value.some(
-      (p) =>
-        p.fromFloor === e.currentFloor &&
-        (e.direction === 0 || p.direction === e.direction) &&
-        e.passengers.length < config.value.maxCapacity,
-    )
+    // 檢查是否可以接人（允許順路接人）
+    const canPickUp = waitingQueue.value.some((p) => {
+      if (p.fromFloor !== e.currentFloor) return false
+      if (e.passengers.length >= config.value.maxCapacity) return false
 
-    if (anyoneToDrop || isTargetedToPick || canPickUpOnTheWay) {
+      // 檢查接人條件（與 handleBoardingAndAlighting 完全一致）
+      const isSameDir = e.direction === p.direction
+      const isEmpty = e.passengers.length === 0
+      const isTopTurnaround = e.currentFloor === config.value.maxFloor
+      const isBottomTurnaround = e.currentFloor === 1
+      const isIdle = e.direction === 0
+
+      return isSameDir || isEmpty || isTopTurnaround || isBottomTurnaround || isIdle
+    })
+
+    if (anyoneToDrop || canPickUp) {
       e.status = 'PROCESSING'
       return
     }
